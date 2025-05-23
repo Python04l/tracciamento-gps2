@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Tracciamento GPS</title>
-  <link rel="stylesheet" href="style.css">
+    <title>Condividi Posizione GPS</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Benvenuto nel progetto di tracciamento GPS</h1>
-  <button onclick="getLocation()">Ottieni posizione</button>
-  <p id="output">La tua posizione apparirà qui.</p>
-
-  <script src="main.js"></script>
+    <div class="container">
+        <h1>Tracciamento GPS</h1>
+        <button id="shareBtn">Genera Link per Google Maps</button>
+        <div id="linkContainer"></div>
+    </div>
+    <script src="main.js"></script>
 </body>
 </html>
